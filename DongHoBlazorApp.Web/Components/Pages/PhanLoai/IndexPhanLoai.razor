@@ -1,0 +1,369 @@
+﻿@code {
+    void goToCreate()
+    {
+        NavigationManager.NavigateTo("/CreatePhanLoai");
+    }
+}
+@page "/PhanLoai"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+<PageTitle>Trang chủ phân loại</PageTitle>
+
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s;
+    }
+
+    @@keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        padding: 25px 30px;
+        border-bottom: 1px solid #e1e8ed;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+    .close {
+        font-size: 32px;
+        font-weight: 300;
+        color: #95a5a6;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+        .close:hover {
+            color: #2c3e50;
+        }
+
+    .modal-body {
+        padding: 30px;
+    }
+
+    .modal-footer {
+        padding: 20px 30px;
+        border-top: 1px solid #e1e8ed;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 56px;
+        height: 28px;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 28px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+    }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+    .action-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .action-btn.edit {
+            background: #667eea;
+            color: white;
+        }
+
+            .action-btn.edit:hover {
+                background: #5568d3;
+                transform: translateY(-2px);
+            }
+
+        .action-btn.delete {
+            background: #f5576c;
+            color: white;
+        }
+
+            .action-btn.delete:hover {
+                background: #e04455;
+                transform: translateY(-2px);
+            }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #95a5a6;
+    }
+
+    .empty-state-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .category-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+</style>
+
+<!-- Main Content -->
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Quản Lý Phân Loại</h1>
+            <p class="breadcrumb">Dashboard / Phân Loại</p>
+        </div>
+        <div class="header-right">
+            <a href="/CreatePhanLoai" class="btn btn-primary" style="text-decoration: none; display: inline-block; color: white;">+ Thêm Phân Loại Mới</a>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        
+        @{
+            <div class="stat-card purple">
+                <div class="stat-icon">📑</div>
+                <div class="stat-info">
+                    <h3 id="totalCategories">@PhanLoaiModels.Count()</h3>
+                    <p>Tổng Phân Loại</p>
+                    <span class="stat-change positive">Đang hoạt động</span>
+                </div>
+            </div>
+
+            var checkTrangThai = PhanLoaiModels.Where(w => w.TrangThai == true).ToList();
+            <div class="stat-card blue">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="activeCategories">@checkTrangThai.Count()</h3>
+                    <p>Đang Kích Hoạt</p>
+                    <span class="stat-change positive">100%</span>
+                </div>
+            </div>
+        }
+       @*  <div class="stat-card green">
+            <div class="stat-icon">⌚</div>
+            <div class="stat-info">
+                <h3>248</h3>
+                <p>Sản Phẩm</p>
+                <span class="stat-change positive">Đã phân loại</span>
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-info">
+                <h3>12</h3>
+                <p>Cập Nhật Gần Đây</p>
+                <span class="stat-change positive">7 ngày qua</span>
+            </div>
+        </div> *@
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm phân loại..." onkeyup="searchCategories()">
+                <span class="search-icon">🔍</span>
+            </div>
+            <select class="filter-select" id="statusFilter" onchange="filterCategories()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="true">Đang kích hoạt</option>
+                <option value="false">Đã tắt</option>
+            </select>
+            <button class="btn btn-secondary" onclick="exportToExcel()">📥 Xuất Excel</button>
+        </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Danh Sách Phân Loại</h3>
+            <span id="categoryCount" style="color: #95a5a6; font-size: 14px;">Hiển thị @checkTrangThai.Count() phân loại</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" id="categoryTable">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Mã PL</th>
+                        <th>Tên Phân Loại</th>
+                        <th style="width: 150px;">Số Sản Phẩm</th>
+                        <th style="width: 150px;">Trạng Thái</th>
+                        @* <th style="width: 200px;">Ngày Tạo</th> *@
+                        <th style="width: 180px; text-align: center;">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                    @foreach (var item in PhanLoaiModels)
+                    {
+                        <tr>
+                            <td><strong>@item.MaPL</strong></td>
+                            <td>
+                                <div class="category-badge">
+                                    <div class="category-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">👨</div>
+                                    <span>@item.TenPL</span>
+                                </div>
+                            </td>
+                             <td>
+                            <strong style="color: #667eea; font-size: 16px;">128</strong> sản phẩm
+                        </td>
+                            @if (item.TrangThai == true)
+                            {
+                                <td>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked onchange="toggleStatus(1)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </td>
+                            }
+                            else
+                            {
+
+                                <td>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" onchange="toggleStatus(0)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </td>
+                            }
+                            @* <td>15/01/2024<br><span style="color: #95a5a6; font-size: 12px;">10:30 AM</span></td> *@
+                            <td style="text-align: center;">
+                                <a href="/EditPhanLoai/@item.MaPL" class="action-btn edit" style="text-decoration: none; display: inline-block;">✏️ Sửa</a>
+                                <button class="action-btn delete" @onclick="() => ShowDeleteModal(item.MaPL)">🗑️ Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📑</div>
+            <h3 style="color: #2c3e50; margin-bottom: 10px;">Không tìm thấy phân loại</h3>
+            <p>Hãy thử tìm kiếm với từ khóa khác hoặc thêm phân loại mới</p>
+        </div>
+    </div>
+</div>
+
+@if (IsShowDeleteModal)
+{
+    <div class="modal" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="max-width: 400px; margin-top: 15%;">
+            <div class="modal-header">
+                <h2>Xác nhận xóa</h2>
+                <span class="close" @onclick="CloseDeleteModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa phân loại này không?</p>
+                @if (!string.IsNullOrEmpty(DeleteErrorMessage))
+                {
+                    <div style="color: red; margin-top: 10px; background-color: #f8d7da; padding: 10px; border-radius: 5px;">
+                        ⚠️ @DeleteErrorMessage
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseDeleteModal">Hủy</button>
+                <button class="btn btn-danger" style="background-color: #f5576c; color: white;" @onclick="ConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+}

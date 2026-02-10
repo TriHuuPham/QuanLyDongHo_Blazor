@@ -1,0 +1,387 @@
+﻿@page "/EditPhieuNhap/{Id:int}"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+<PageTitle>Chỉnh sửa phiếu nhập</PageTitle>
+
+
+<style>
+    .form-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        font-size: 20px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .info-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #e8f4f8;
+        color: #0c5460;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .status-selector {
+        display: flex;
+        gap: 15px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .status-option {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+        .status-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .status-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .status-option input[type="radio"] {
+            display: none;
+        }
+
+    .status-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .status-label {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+    }
+
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+        .product-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .product-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .product-table input, .product-table select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+    .btn-add-row {
+        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .btn-remove-row {
+        background: #f5576c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .summary-box {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 15px;
+        margin-top: 20px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 16px;
+    }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid #667eea;
+        }
+
+    .summary-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 18px;
+    }
+
+    .summary-row:last-child .summary-value {
+        font-size: 28px;
+        color: #27ae60;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert.warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .required-mark {
+        color: #f5576c;
+        font-weight: bold;
+    }
+
+    .form-help {
+        font-size: 13px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        padding: 20px 0;
+    }
+</style>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Chỉnh Sửa Phiếu Nhập</h1>
+            <p class="breadcrumb">
+                <a href="#" @onclick:preventDefault @onclick='() => NavigationManager.NavigateTo("/")' style="color: #667eea; text-decoration: none;">Trang Chủ</a> /
+                <a href="#" @onclick:preventDefault @onclick='() => NavigationManager.NavigateTo("/PhieuNhap")' style="color: #667eea; text-decoration: none;">Phiếu Nhập</a> /
+                Chỉnh Sửa
+            </p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-secondary" @onclick='() => NavigationManager.NavigateTo("/PhieuNhap")'>← Quay Lại</button>
+        </div>
+    </header>
+
+    @if (IsSuccess)
+    {
+        <div class="alert success" style="display: block;"><strong>✓ Thành công!</strong> Phiếu nhập đã được cập nhật.</div>
+    }
+    @if (IsError)
+    {
+        <div class="alert error" style="display: block;"><strong>✗ Lỗi!</strong> <span>@ErrorMessage</span></div>
+    }
+    <div class="alert warning" style="display: block;"><strong>⚠️ Lưu ý:</strong> Việc chỉnh sửa phiếu nhập sẽ ảnh hưởng đến số liệu tồn kho.</div>
+
+    <div class="form-container">
+        <div class="info-badge">📌 Mã: <strong>PN-@CurrentPhieuNhap.MaPhieuNhap.ToString("D3")</strong> | Ngày tạo: <strong>@CurrentPhieuNhap.NgayNhap.ToString("dd/MM/yyyy")</strong></div>
+
+        <form id="importForm" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+            <!-- Basic Info -->
+            <div class="form-section">
+                <h3 class="section-title">📝 Thông Tin Phiếu Nhập</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Mã Phiếu Nhập</label>
+                        <input type="text" class="form-control" value="PN-@CurrentPhieuNhap.MaPhieuNhap.ToString("D3")" disabled style="background: #f8f9fa; cursor: not-allowed;">
+                        <p class="form-help">🔒 Mã phiếu nhập không thể thay đổi</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ngày Nhập <span class="required-mark">*</span></label>
+                        <input type="date" class="form-control" @bind="CurrentPhieuNhap.NgayNhap" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nhà Cung Cấp <span class="required-mark">*</span></label>
+                    <select class="form-control" @bind="CurrentPhieuNhap.MaNCC" required>
+                        <option value="0">-- Chọn nhà cung cấp --</option>
+                        @foreach (var ncc in NhaCungCapModels)
+                        {
+                            <option value="@ncc.MaNCC">@ncc.TenNCC</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="form-section">
+                <h3 class="section-title">📋 Trạng Thái Phiếu Nhập</h3>
+                <div class="status-selector">
+                    <div class="status-option @(CurrentPhieuNhap.TrangThaiNhap == "Chờ duyệt" ? "selected" : "")" @onclick='() => CurrentPhieuNhap.TrangThaiNhap = "Chờ duyệt"'>
+                        <div class="status-icon">⏳</div>
+                        <div class="status-label">Chờ Duyệt</div>
+                    </div>
+                    <div class="status-option @(CurrentPhieuNhap.TrangThaiNhap == "Đã duyệt" ? "selected" : "")" @onclick='() => CurrentPhieuNhap.TrangThaiNhap = "Đã duyệt"'>
+                        <div class="status-icon">✅</div>
+                        <div class="status-label">Đã Duyệt</div>
+                    </div>
+                    <div class="status-option @(CurrentPhieuNhap.TrangThaiNhap == "Từ chối" ? "selected" : "")" @onclick='() => CurrentPhieuNhap.TrangThaiNhap = "Từ chối"'>
+                        <div class="status-icon">❌</div>
+                        <div class="status-label">Từ Chối</div>
+                    </div>
+                </div>
+                <p class="form-help" style="margin-top: 15px;">💡 Chỉ phiếu "Đã duyệt" mới được cập nhật vào tồn kho</p>
+            </div>
+
+            <!-- Products Table -->
+            <div class="form-section">
+                <h3 class="section-title">📦 Chi Tiết Sản Phẩm Nhập</h3>
+                <div style="overflow-x: auto;">
+                    <table class="product-table" id="productTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">STT</th>
+                                <th style="width: 250px;">Đồng Hồ</th>
+                                <th style="width: 120px;">Số Lượng</th>
+                                <th style="width: 150px;">Đơn Giá</th>
+                                <th style="width: 150px;">Thành Tiền</th>
+                                <th style="width: 80px;">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            @for (int i = 0; i < ChiTietItems.Count; i++)
+                            {
+                                var index = i;
+                                var item = ChiTietItems[index];
+                                <tr class="product-row">
+                                    <td class="row-number">@(index + 1)</td>
+                                    <td>
+                                        <select class="product-select" @bind="item.MaDongHo" required>
+                                            <option value="0">-- Chọn đồng hồ --</option>
+                                            @foreach (var dh in DongHoModels)
+                                            {
+                                                <option value="@dh.MaDongHo">@dh.TenDongHo</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="quantity-input" min="1" @bind="item.SoLuongNhap" required></td>
+                                    <td><input type="number" class="price-input" min="0" @bind="item.DonGiaNhap" required></td>
+                                    <td>
+                                        <input type="text" class="total-input" readonly 
+                                               value="@((item.SoLuongNhap * (int)item.DonGiaNhap).ToString("N0") + " ₫")"
+                                               style="background: #f8f9fa; font-weight: 600; color: #27ae60;">
+                                    </td>
+                                    <td><button type="button" class="btn-remove-row" @onclick="() => RemoveRow(item)">🗑️</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn-add-row" @onclick="AddRow">➕ Thêm Sản Phẩm</button>
+            </div>
+
+            <!-- Summary -->
+            <div class="form-section">
+                <h3 class="section-title">💰 Tổng Kết</h3>
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span class="summary-label">Tổng Số Lượng:</span>
+                        <span class="summary-value">@TotalQuantity</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Tổng Số Mặt Hàng:</span>
+                        <span class="summary-value">@TotalItems</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">TỔNG TIỀN:</span>
+                        <span class="summary-value">@GrandTotal.ToString("N0") ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">🗑️ Xóa Phiếu Nhập</button>
+                <div style="flex: 1;"></div>
+                <button type="button" class="btn btn-secondary" @onclick='() => NavigationManager.NavigateTo("/PhieuNhap")'>❌ Hủy Bỏ</button>
+                <button type="submit" class="btn btn-primary">✓ Lưu Thay Đổi</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,446 @@
+﻿@page "/CreateDongHo"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+<PageTitle>Tạo đồng hồ</PageTitle>
+
+<style>
+    .form-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        font-size: 20px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+
+    .image-upload-area {
+        border: 3px dashed #e1e8ed;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+    .image-preview-img {
+        max-width: 100%;
+        max-height: 400px;
+        margin: 20px auto;
+        border-radius: 15px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 32px;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 32px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+    }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .char-counter {
+        float: right;
+        font-size: 12px;
+        color: #95a5a6;
+    }
+
+    .required-mark {
+        color: #f5576c;
+        font-weight: bold;
+    }
+
+    .form-help {
+        font-size: 13px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        padding: 20px 0;
+    }
+
+    .preview-card {
+        padding: 30px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+    }
+
+    .preview-image {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 20px;
+        border-radius: 15px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+    .preview-details {
+        text-align: center;
+    }
+
+    .preview-brand {
+        font-size: 14px;
+        color: #667eea;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .preview-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 12px;
+    }
+
+    .preview-price {
+        font-size: 32px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+
+    .preview-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .preview-stat {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .preview-stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .preview-stat-label {
+        font-size: 12px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-right">
+            <button class="btn btn-secondary" @onclick='() => NavigationManager.NavigateTo("/DongHo")'>← Quay Lại</button>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <EditForm Model="@DongHoModel" OnValidSubmit="ConfirmCreateDongHo">
+            <DataAnnotationsValidator />
+            
+            <!-- Alert Messages -->
+            @if (IsSuccess)
+            {
+                <div class="alert success">
+                    <strong>✓ Thành công!</strong> Đồng hồ đã được tạo thành công.
+                </div>
+            }
+
+            @if (IsError)
+            {
+                <div class="alert error">
+                    <strong>✗ Lỗi!</strong> <span>@ErrorMessage</span>
+                </div>
+            }
+
+            <!-- Basic Info -->
+            <div class="form-section">
+                <h3 class="section-title">📝 Thông Tin Cơ Bản</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Mã Đồng Hồ <span class="required-mark">*</span></label>
+                        <InputNumber @bind-Value="DongHoModel.MaDongHo" class="form-control" placeholder="DH-001" />
+                        <p class="form-help">💡 Mã định danh duy nhất (Số)</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Thương Hiệu <span class="required-mark">*</span></label>
+                        <InputSelect @bind-Value="DongHoModel.MaThuongHieu" class="form-control">
+                            <option value="0">-- Chọn thương hiệu --</option>
+                            @foreach (var item in ThuongHieuModels)
+                            {
+                                <option value="@item.MaThuongHieu">@item.TenThuongHieu</option>
+                            }
+                        </InputSelect>
+                        <p class="form-help">💎 Chọn thương hiệu đồng hồ</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tên Đồng Hồ <span class="required-mark">*</span><span class="char-counter">@(DongHoModel.TenDongHo?.Length ?? 0)/1000</span></label>
+                    <InputText @bind-Value="DongHoModel.TenDongHo" class="form-control" placeholder="Ví dụ: Rolex Submariner Date 126610LN" maxlength="1000" />
+                    <p class="form-help">⌚ Tên đầy đủ của đồng hồ</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phân Loại <span class="required-mark">*</span></label>
+                        <InputSelect @bind-Value="DongHoModel.MaPL" class="form-control">
+                            <option value="0">-- Chọn phân loại --</option>
+                            @foreach (var item in PhanLoaiModels)
+                            {
+                                <option value="@item.MaPL">@item.TenPL</option>
+                            }
+                        </InputSelect>
+                        <p class="form-help">📑 Loại đồng hồ</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nhà Cung Cấp <span class="required-mark">*</span></label>
+                        <InputSelect @bind-Value="DongHoModel.MaNCC" class="form-control">
+                            <option value="0">-- Chọn nhà cung cấp --</option>
+                            @foreach (var item in NhaCungCapModels)
+                            {
+                                <option value="@item.MaNCC">@item.TenNCC</option>
+                            }
+                        </InputSelect>
+                        <p class="form-help">🏢 Nguồn nhập hàng</p>
+                    </div>
+                </div>
+
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Giá Bán <span class="required-mark">*</span></label>
+                        <InputNumber @bind-Value="DongHoModel.GiaBan" class="form-control" placeholder="12500" step="1000" />
+                        <p class="form-help">💰 Giá bán (VNĐ)</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số Lượng Tồn <span class="required-mark">*</span></label>
+                        <InputNumber @bind-Value="DongHoModel.SoLuongTon" class="form-control" placeholder="45" />
+                        <p class="form-help">📦 Số lượng trong kho</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Đã Bán</label>
+                        <InputNumber @bind-Value="DongHoModel.DaBan" class="form-control" placeholder="0" />
+                        <p class="form-help">📊 Số lượng đã bán</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mô Tả Chi Tiết<span class="char-counter">@(DongHoModel.MoTa?.Length ?? 0)/5000</span></label>
+                    <InputTextArea @bind-Value="DongHoModel.MoTa" class="form-control" rows="6" placeholder="Nhập mô tả chi tiết về đồng hồ..." maxlength="5000" />
+                    <p class="form-help">📄 Thông tin chi tiết, tính năng, chất liệu...</p>
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-section">
+                <h3 class="section-title">📷 Hình Ảnh</h3>
+                <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                    @if (string.IsNullOrEmpty(previewImageUrl))
+                    {
+                        <div style="font-size: 80px; margin-bottom: 20px;">📷</div>
+                        <h4 style="color: #2c3e50; margin-bottom: 10px;">Click để chọn hình ảnh</h4>
+                        <p style="color: #95a5a6; margin-bottom: 15px;">Hỗ trợ: JPG, PNG (tối đa 5MB)</p>
+                    }
+                    else
+                    {
+                        <img src="@previewImageUrl" class="image-preview-img" alt="Preview">
+                    }
+                    <button type="button" class="btn btn-primary">@(string.IsNullOrEmpty(previewImageUrl) ? "Chọn Hình Ảnh" : "Thay Đổi Ảnh")</button>
+                    <InputFile id="imageInput" OnChange="HandleFileSelected" accept="image/*" style="display: none;" />
+                </div>
+                
+                @if (!string.IsNullOrEmpty(uploadedFileName))
+                {
+                    <div id="imageInfo" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>@uploadedFileName</strong>
+                                <p style="color: #95a5a6; font-size: 13px; margin: 5px 0 0 0;">@uploadedFileSize</p>
+                            </div>
+                            <button type="button" class="btn btn-danger" @onclick="RemoveUploadedFile">🗑️ Xóa</button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Status -->
+            <div class="form-section">
+                <h3 class="section-title">⚙️ Cài Đặt</h3>
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                        <div>
+                            <label class="form-label" style="margin: 0; font-size: 16px;">Trạng Thái <span class="required-mark">*</span></label>
+                            <p class="form-help" style="margin: 8px 0 0 0;">Bật để đồng hồ hiển thị công khai</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <InputCheckbox @bind-Value="DongHoModel.TrangThai" id="watchStatus" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="form-section">
+                <h3 class="section-title">👁️ Xem Trước</h3>
+                <div class="preview-card">
+                    <div class="preview-image">
+                        @if (!string.IsNullOrEmpty(previewImageUrl))
+                        {
+                            <img src="@previewImageUrl" alt="Preview">
+                        }
+                        else
+                        {
+                            <span>⌚</span>
+                        }
+                    </div>
+                    <div class="preview-details">
+                        <div class="preview-brand">@(ThuongHieuModels.FirstOrDefault(th => th.MaThuongHieu == DongHoModel.MaThuongHieu)?.TenThuongHieu ?? "THƯƠNG HIỆU")</div>
+                        <div class="preview-name">@(string.IsNullOrEmpty(DongHoModel.TenDongHo) ? "Tên Đồng Hồ" : DongHoModel.TenDongHo)</div>
+                        <div class="preview-price">@DongHoModel.GiaBan.ToString("N0")đ</div>
+                        <div class="preview-stats">
+                            <div class="preview-stat">
+                                <div class="preview-stat-value">@DongHoModel.SoLuongTon</div>
+                                <div class="preview-stat-label">Tồn kho</div>
+                            </div>
+                            <div class="preview-stat">
+                                <div class="preview-stat-value">0</div>
+                                <div class="preview-stat-label">Lượt xem</div>
+                            </div>
+                            <div class="preview-stat">
+                                <div class="preview-stat-value">@DongHoModel.DaBan</div>
+                                <div class="preview-stat-label">Đã bán</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <span class="badge @(DongHoModel.TrangThai ? "new" : "sale")" style="padding: 10px 20px; font-size: 14px;">
+                                @(DongHoModel.TrangThai ? "Đang bán" : "Ngừng bán")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" @onclick='() => NavigationManager.NavigateTo("/DongHo")'>❌ Hủy Bỏ</button>
+                <button type="submit" class="btn btn-primary">✓ Tạo Đồng Hồ</button>
+            </div>
+        </EditForm>
+    </div>
+</div>

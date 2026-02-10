@@ -1,0 +1,494 @@
+﻿@code {
+    void goToCreate()
+    {
+        NavigationManager.NavigateTo("/CreateThuongHieu");
+    }
+}
+@page "/ThuongHieu"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+<PageTitle>Trang chủ thương hiệu</PageTitle>
+
+<style>
+    .brand-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .brand-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .brand-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+    .brand-logo-container {
+        height: 180px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .brand-logo-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .brand-logo {
+        max-width: 80%;
+        max-height: 140px;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+    }
+
+    .brand-logo-placeholder {
+        font-size: 80px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .brand-info {
+        padding: 20px;
+    }
+
+    .brand-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+    }
+
+    .brand-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .brand-code {
+        font-size: 12px;
+        color: #95a5a6;
+        background: #f8f9fa;
+        padding: 4px 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+        display: inline-block;
+    }
+
+    .brand-desc {
+        color: #7f8c8d;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 40px;
+    }
+
+    .brand-stats {
+        display: flex;
+        gap: 15px;
+        padding: 15px 0;
+        border-top: 1px solid #e1e8ed;
+        margin-bottom: 15px;
+    }
+
+    .brand-stat {
+        flex: 1;
+        text-align: center;
+    }
+
+    .brand-stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: #667eea;
+        display: block;
+    }
+
+    .brand-stat-label {
+        font-size: 12px;
+        color: #95a5a6;
+        margin-top: 3px;
+    }
+
+    .brand-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 15px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+        .action-btn.view {
+            background: #667eea;
+            color: white;
+        }
+
+            .action-btn.view:hover {
+                background: #5568d3;
+            }
+
+        .action-btn.edit {
+            background: #38ef7d;
+            color: white;
+        }
+
+            .action-btn.edit:hover {
+                background: #2dd36f;
+            }
+
+        .action-btn.delete {
+            background: #f5576c;
+            color: white;
+        }
+
+            .action-btn.delete:hover {
+                background: #e04455;
+            }
+
+    .toggle-switch-small {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 22px;
+    }
+
+        .toggle-switch-small input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider-small {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 22px;
+    }
+
+        .toggle-slider-small:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    .toggle-switch-small input:checked + .toggle-slider-small {
+        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+    }
+
+        .toggle-switch-small input:checked + .toggle-slider-small:before {
+            transform: translateX(22px);
+        }
+
+    .filter-chips {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .filter-chip {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #e1e8ed;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .filter-chip:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 15px;
+    }
+
+    .empty-state-icon {
+        font-size: 100px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: #2c3e50;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #95a5a6;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Quản Lý Thương Hiệu</h1>
+            <p class="breadcrumb">Trang Chủ / Thương Hiệu</p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" @onclick="goToCreate">
+                + Thêm Thương Hiệu Mới
+            </button>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        @{
+            <div class="stat-card purple">
+                <div class="stat-icon">💎</div>
+                <div class="stat-info">
+                    <h3 id="totalBrands">@ThuongHieuModels.Count()</h3>
+                    <p>Tổng Thương Hiệu</p>
+                    <span class="stat-change positive">+2 tháng này</span>
+                </div>
+            </div>
+            var checkTrangThai = ThuongHieuModels.Where(w => w.TrangThai == true).ToList();
+            <div class="stat-card blue">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="activeBrands">@checkTrangThai.Count()</h3>
+                    <p>Đang Kích Hoạt</p>
+                    <span class="stat-change positive">100%</span>
+                </div>
+            </div>
+       
+        @* <div class="stat-card green">
+            <div class="stat-icon">⌚</div>
+            <div class="stat-info">
+                <h3>248</h3>
+                <p>Sản Phẩm</p>
+                <span class="stat-change positive">Từ các thương hiệu</span>
+            </div>
+        </div> *@
+        <div class="stat-card orange">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-info">
+                <h3>@ThuongHieuModels.Count()</h3>
+                <p>Thương Hiệu Cao Cấp</p>
+                <span class="stat-change positive">Luxury brands</span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; margin-bottom: 15px;">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm thương hiệu..." onkeyup="searchBrands()">
+                <span class="search-icon">🔍</span>
+            </div>
+            <select class="filter-select" id="statusFilter" onchange="filterBrands()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Đang kích hoạt</option>
+                <option value="inactive">Đã tắt</option>
+            </select>
+            <select class="filter-select" id="sortFilter" onchange="sortBrands()">
+                <option value="name-asc">Tên A-Z</option>
+                <option value="name-desc">Tên Z-A</option>
+                <option value="products-desc">Nhiều sản phẩm nhất</option>
+                <option value="products-asc">Ít sản phẩm nhất</option>
+            </select>
+            <button class="btn btn-secondary" onclick="exportToExcel()">📥 Xuất Excel</button>
+        </div>
+
+        <!-- Filter Chips -->
+        @*  <div class="filter-chips">
+            <div class="filter-chip active" onclick="filterByType('all', this)">
+                <span>📋 Tất cả (12)</span>
+            </div>
+            <div class="filter-chip" onclick="filterByType('luxury', this)">
+                <span>👑 Cao cấp (5)</span>
+            </div>
+            <div class="filter-chip" onclick="filterByType('premium', this)">
+                <span>⭐ Premium (4)</span>
+            </div>
+            <div class="filter-chip" onclick="filterByType('standard', this)">
+                <span>🎯 Standard (3)</span>
+            </div>
+        </div> *@
+    </div>
+
+    <!-- Brands Grid -->
+    <div class="brand-grid" id="brandGrid">
+        @foreach (var item in ThuongHieuModels)
+        {
+            <div class="brand-card" data-brand-type="luxury" data-status="active">
+                <div class="brand-logo-container" style="background: linear-gradient(135deg, #1a472a 0%, #2d5f3f 100%);">
+                    @if (!string.IsNullOrEmpty(item.Logo))
+                    {
+                        @if (item.Logo.StartsWith("/") || item.Logo.StartsWith("http"))
+                        {
+                            <img src="@item.Logo" alt="@item.TenThuongHieu" class="brand-logo" style="max-width: 95%; max-height: 160px; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));" />
+                        }
+                        else
+                        {
+                            <div class="brand-logo-placeholder" style="color: #d4af37;">@item.Logo</div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="brand-logo-placeholder" style="color: #d4af37;">💎</div>
+                    }
+                </div>
+                <div class="brand-info">
+                    <div class="brand-header">
+                        <div>
+                            <h3 class="brand-name">@item.TenThuongHieu</h3>
+                            <span class="brand-code">@item.TenThuongHieu-@item.MaThuongHieu</span>
+                        </div>
+                        <label class="toggle-switch-small">
+                            <input type="checkbox" checked onchange="toggleBrandStatus('@item.TenThuongHieu-@item.MaThuongHieu')">
+                            <span class="toggle-slider-small"></span>
+                        </label>
+                    </div>
+                    <p class="brand-desc">@item.MoTa</p>
+                   @*  <div class="brand-stats">
+                        <div class="brand-stat">
+                            <span class="brand-stat-value">45</span>
+                            <span class="brand-stat-label">Sản phẩm</span>
+                        </div>
+                        <div class="brand-stat">
+                            <span class="brand-stat-value">$12.5K</span>
+                            <span class="brand-stat-label">Giá TB</span>
+                        </div>
+                    </div> *@
+                    <div class="brand-actions">
+                        @* <button class="action-btn view" onclick="viewBrand('CAS-001')">👁️ Xem</button> *@
+                        <a href="/EditThuongHieu/@item.MaThuongHieu" class="action-btn edit" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">✏️ Sửa</a>
+                        <button class="action-btn delete" @onclick="() => ShowDeleteModal(item.MaThuongHieu)">🗑️</button>
+                    </div>
+                </div>
+            </div>
+         }
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">💎</div>
+        <h3>Không tìm thấy thương hiệu</h3>
+        <p>Hãy thử tìm kiếm với từ khóa khác hoặc thêm thương hiệu mới</p>
+        <button class="btn btn-primary" @onclick="goToCreate">
+            + Thêm Thương Hiệu Mới
+        </button>
+    </div>
+</div>
+
+@if (IsShowDeleteModal)
+{
+    <div class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;" @onclick="CloseDeleteModal">
+        <div class="modal-content" style="background: white; border-radius: 12px; width: 450px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: modalSlideIn 0.3s ease-out;" @onclick:stopPropagation>
+            <div class="modal-header" style="padding: 25px 30px; border-bottom: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 24px; color: #2C3E50; font-weight: 700;">Xác nhận xóa</h2>
+                <button type="button" @onclick="CloseDeleteModal" style="background: transparent; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; transition: color 0.2s;">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 40px 30px; line-height: 1.6;">
+                <p style="margin: 0; font-size: 18px; color: #333;">Bạn có chắc chắn muốn xóa thương hiệu này không?</p>
+                @if (!string.IsNullOrEmpty(DeleteErrorMessage))
+                {
+                    <div style="margin-top: 15px; padding: 12px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; color: #c53030; font-size: 14px;">
+                        ⚠️ @DeleteErrorMessage
+                    </div>
+                }
+            </div>
+            <div class="modal-footer" style="padding: 15px 30px 25px; border-top: 1px solid #edf2f7; display: flex; justify-content: flex-end; gap: 15px;">
+                <button class="btn" @onclick="CloseDeleteModal" style="padding: 12px 30px; background: #E1E8EE; color: #2C3E50; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                    Hủy
+                </button>
+                <button class="btn" @onclick="ConfirmDelete" style="padding: 12px 30px; background: #FF4D6D; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    @@keyframes modalSlideIn {
+        from { transform: translateY(-30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+

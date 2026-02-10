@@ -1,0 +1,393 @@
+﻿@code {
+    void goToCreate()
+    {
+        NavigationManager.NavigateTo("/CreatePhieuNhap");
+    }
+}
+@page "/PhieuNhap"
+@rendermode InteractiveServer
+<PageTitle>Trang chủ phiếu nhập</PageTitle>
+
+
+<style>
+    .invoice-table {
+        width: 100%;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+        .invoice-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .invoice-table th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .invoice-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .invoice-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+            .invoice-table tbody tr:hover {
+                background: #f8f9fa;
+                transform: scale(1.01);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            }
+
+    .invoice-code {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 15px;
+    }
+
+    .invoice-date {
+        color: #7f8c8d;
+        font-size: 13px;
+    }
+
+    .invoice-price {
+        font-weight: 700;
+        font-size: 16px;
+        color: #27ae60;
+    }
+
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .action-btns {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+        .action-btn.view {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.edit {
+            background: #38ef7d;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #f5576c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+    .filters {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .date-range {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: white;
+        border-radius: 15px;
+        margin-top: 20px;
+    }
+
+    .pagination-info {
+        color: #95a5a6;
+        font-size: 14px;
+    }
+
+    .pagination-btns {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-btn {
+        padding: 8px 14px;
+        border: 1px solid #e1e8ed;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: #2c3e50;
+        transition: all 0.3s;
+    }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 15px;
+    }
+</style>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Quản Lý Phiếu Nhập</h1>
+            <p class="breadcrumb">Trang Chủ / Phiếu Nhập</p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" @onclick="goToCreate">
+                + Tạo Phiếu Nhập Mới
+            </button>
+        </div>
+    </header>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        @{
+            var PhieuNhap_ChoDuyet = PhieuNhaps.Where(p => p.TrangThaiNhap == "Chờ duyệt").Count();
+            var PhieuNhap_DaDuyet = PhieuNhaps.Where(p => p.TrangThaiNhap == "Đã duyệt").Count();
+            <div class="stat-card purple">
+                <div class="stat-icon">📥</div>
+                <div class="stat-info">
+                    <h3>@PhieuNhaps.Count()</h3>
+                    <p>Tổng Phiếu Nhập</p>
+                    <span class="stat-change positive">+8 tháng này</span>
+                </div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3>@PhieuNhap_ChoDuyet</h3>
+                    <p>Chờ Duyệt</p>
+                    <span class="stat-change neutral">Cần xử lý</span>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>@PhieuNhap_DaDuyet</h3>
+                    <p>Đã Duyệt</p>
+                    <span class="stat-change positive">88.5%</span>
+                </div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon">💰</div>
+                <div class="stat-info">
+                    <h3>@PhieuNhaps.Sum(p => p.TongTien).ToString("N0") ₫</h3>
+                    <p>Tổng Giá Trị</p>
+                    <span class="stat-change positive">@PhieuNhaps.Count() phiếu nhập</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+        <div class="filters">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" @bind="SearchText" @bind:event="oninput" placeholder="Tìm mã phiếu, nhà cung cấp...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <select class="filter-select" @bind="SelectedSuplierId">
+                <option value="0">Tất cả NCC</option>
+                @foreach (var item in NhaCungCapModels)
+                {
+                    <option value="@item.MaNCC">@item.TenNCC</option>
+                }
+            </select>
+            <select class="filter-select" @bind="SelectedStatus">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Từ chối</option>
+            </select>
+            <button class="btn btn-secondary">📥 Xuất Excel</button>
+        </div>
+    </div>
+
+    <!-- Invoice Table -->
+    <div class="invoice-table">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Mã Phiếu</th>
+                    <th style="width: 200px;">Nhà Cung Cấp</th>
+                    <th style="width: 120px;">Ngày Nhập</th>
+                    <th style="width: 120px;">Số Lượng</th>
+                    <th style="width: 150px;">Tổng Tiền</th>
+                    <th style="width: 120px;">Trạng Thái</th>
+                    <th style="width: 200px;">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceTableBody">
+                @if (PaginatedPhieuNhaps != null && PaginatedPhieuNhaps.Any())
+                {
+                    @foreach (var p in PaginatedPhieuNhaps)
+                    {
+                        var statusClass = p.TrangThaiNhap switch
+                        {
+                            "Chờ duyệt" => "status-pending",
+                            "Đã duyệt" => "status-approved",
+                            "Từ chối" => "status-rejected",
+                            _ => ""
+                        };
+                        var nccName = NhaCungCapModels.FirstOrDefault(ncc => ncc.MaNCC == p.MaNCC)?.TenNCC ?? $"NCC-{p.MaNCC}";
+
+                        <tr data-status="@p.TrangThaiNhap">
+                            <td><span class="invoice-code">PN-@p.MaPhieuNhap.ToString("D3")</span></td>
+                            <td>@nccName</td>
+                            <td><span class="invoice-date">@p.NgayNhap.ToString("dd/MM/yyyy")</span></td>
+                            <td>@ChiTietPhieuNhapModels.Where(ct => ct.MaPhieuNhap == p.MaPhieuNhap).Sum(ct => ct.SoLuongNhap) sản phẩm</td>
+                            <td><span class="invoice-price">@p.TongTien.ToString("N0") ₫</span></td>
+                            <td><span class="status-badge @statusClass">@p.TrangThaiNhap</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn edit" @onclick='() => NavigationManager.NavigateTo($"/EditPhieuNhap/{p.MaPhieuNhap}")'>✏️ Sửa</button>
+                                    <button class="action-btn delete" @onclick="() => ShowDeleteModal(p.MaPhieuNhap)">🗑️ Xóa</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Không có dữ liệu phiếu nhập.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (TotalPages > 1)
+    {
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <p style="color: #95a5a6;">Hiển thị @(((CurrentPage - 1) * ItemsPerPage) + 1)-@Math.Min(CurrentPage * ItemsPerPage, FilteredPhieuNhapModels.Count) trong tổng số @FilteredPhieuNhapModels.Count phiếu nhập</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" @onclick="() => ChangePage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">← Trước</button>
+
+                    @for (int i = 1; i <= TotalPages; i++)
+                    {
+                        var pageNumber = i;
+                        <button class="btn @(CurrentPage == pageNumber ? "btn-primary" : "btn-secondary")" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                    }
+
+                    <button class="btn btn-secondary" @onclick="() => ChangePage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">Sau →</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (IsShowDeleteModal)
+{
+    <div class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;" @onclick="CloseDeleteModal">
+        <div class="modal-content" style="background: white; border-radius: 12px; width: 450px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); animation: modalSlideIn 0.3s ease-out;" @onclick:stopPropagation>
+            <div class="modal-header" style="padding: 25px 30px; border-bottom: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 24px; color: #2C3E50; font-weight: 700;">Xác nhận xóa</h2>
+                <button type="button" @onclick="CloseDeleteModal" style="background: transparent; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; transition: color 0.2s;">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body" style="padding: 40px 30px; line-height: 1.6;">
+                <p style="margin: 0; font-size: 18px; color: #333;">Bạn có chắc chắn muốn xóa phiếu nhập này không?</p>
+                @if (!string.IsNullOrEmpty(DeleteErrorMessage))
+                {
+                    <div style="margin-top: 15px; padding: 12px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px; color: #c53030; font-size: 14px;">
+                        ⚠️ @DeleteErrorMessage
+                    </div>
+                }
+            </div>
+            <div class="modal-footer" style="padding: 15px 30px 25px; border-top: 1px solid #edf2f7; display: flex; justify-content: flex-end; gap: 15px;">
+                <button class="btn" @onclick="CloseDeleteModal" style="padding: 12px 30px; background: #E1E8EE; color: #2C3E50; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                    Hủy
+                </button>
+                <button class="btn" @onclick="ConfirmDelete" style="padding: 12px 30px; background: #FF4D6D; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s;">
+                    Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    @@keyframes modalSlideIn {
+        from {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
