@@ -1,0 +1,334 @@
+﻿@page "/EditKhachHang/{Id:int}"
+@rendermode InteractiveServer
+<PageTitle>Chỉnh sửa khách hàng</PageTitle>
+
+<style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        font-size: 20px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 32px;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 32px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
+    }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert.warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .char-counter {
+        float: right;
+        font-size: 12px;
+        color: #95a5a6;
+    }
+
+    .required-mark {
+        color: #f5576c;
+        font-weight: bold;
+    }
+
+    .form-help {
+        font-size: 13px;
+        color: #95a5a6;
+        margin-top: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        padding: 20px 0;
+    }
+
+    .preview-card {
+        padding: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+    }
+
+    .preview-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 50px;
+        backdrop-filter: blur(10px);
+    }
+
+    .preview-name {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .preview-info {
+        font-size: 14px;
+        opacity: 0.9;
+        line-height: 1.8;
+    }
+</style>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Chỉnh Sửa Khách Hàng</h1>
+            <p class="breadcrumb">
+                <a href="/" style="color: #667eea; text-decoration: none;">Trang Chủ</a> /
+                <a href="/KhachHang" style="color: #667eea; text-decoration: none;">Khách Hàng</a> /
+                Chỉnh Sửa
+            </p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/KhachHang"))">← Quay Lại</button>
+        </div>
+    </header>
+
+    <!-- Alert Messages -->
+    @if (IsSuccess)
+    {
+        <div id="alertSuccess" class="alert success">
+            <strong>✓ Thành công!</strong> Khách hàng đã được cập nhật thành công.
+        </div>
+    }
+
+    @if (IsError)
+    {
+        <div id="alertError" class="alert error">
+            <strong>✗ Lỗi!</strong> <span id="errorMessage">@ErrorMessage</span>
+        </div>
+    }
+
+    <div class="alert warning">
+        <strong>⚠️ Lưu ý:</strong> Bạn đang chỉnh sửa thông tin khách hàng.
+    </div>
+
+    <div class="form-container">
+        @if (KhachHangModel != null && KhachHangModel.MaKH != 0)
+        {
+            <EditForm Model="KhachHangModel" OnValidSubmit="ConfirmEditKhachHang" FormName="edit-khach-hang-form">
+                <DataAnnotationsValidator />
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        📝 Thông Tin Cơ Bản
+                    </h3>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Mã Khách Hàng <span class="required-mark">*</span>
+                        </label>
+                        <input type="text" class="form-control" value="@KhachHangModel.MaKH" disabled style="background: #f8f9fa; cursor: not-allowed;">
+                        <p class="form-help">🔒 Mã khách hàng không thể thay đổi</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Tên Khách Hàng <span class="required-mark">*</span>
+                            <span class="char-counter">@(KhachHangModel.TenKH?.Length ?? 0)/1000</span>
+                        </label>
+                        <InputText @bind-Value="KhachHangModel.TenKH" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" maxlength="1000" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Địa Chỉ <span class="required-mark">*</span>
+                            <span class="char-counter">@(KhachHangModel.DiaChi?.Length ?? 0)/2000</span>
+                        </label>
+                        <InputTextArea @bind-Value="KhachHangModel.DiaChi" class="form-control" rows="3" maxlength="2000" />
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Số Điện Thoại <span class="required-mark">*</span>
+                                <span class="char-counter">@(KhachHangModel.SoDienThoai?.Length ?? 0)/15</span>
+                            </label>
+                            <InputText @bind-Value="KhachHangModel.SoDienThoai" type="tel" class="form-control" maxlength="15" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Email <span class="required-mark">*</span>
+                                <span class="char-counter">@(KhachHangModel.Email?.Length ?? 0)/500</span>
+                            </label>
+                            <InputText @bind-Value="KhachHangModel.Email" type="email" class="form-control" maxlength="500" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Hạng Thành Viên <span class="required-mark">*</span></label>
+                        <InputSelect @bind-Value="KhachHangModel.MaLoaiTV" class="form-control">
+                            <option value="0">-- Chọn hạng thành viên --</option>
+                            @foreach (var loai in LoaiThanhVienModels)
+                            {
+                                <option value="@loai.MaLoaiTV">@loai.TenLoaiTV - (Ưu đãi @loai.UuDai%)</option>
+                            }
+                        </InputSelect>
+                        <p class="form-help">⭐ Phân loại hạng cho khách hàng này</p>
+                    </div>
+                </div>
+
+                <!-- Status Settings -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        ⚙️ Cài Đặt Trạng Thái
+                    </h3>
+
+                    <div class="form-group">
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                            <div>
+                                <label class="form-label" style="margin: 0; font-size: 16px;">
+                                    Trạng Thái Hoạt Động <span class="required-mark">*</span>
+                                </label>
+                                <p class="form-help" style="margin: 8px 0 0 0;">Bật để đánh dấu khách hàng đang hoạt động</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <InputCheckbox @bind-Value="KhachHangModel.TrangThai" id="customerStatus" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">Ghi Chú</label>
+                        <InputTextArea @bind-Value="KhachHangModel.GhiChu" class="form-control" rows="2" placeholder="Nhập ghi chú thêm..." />
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        👁️ Xem Trước
+                    </h3>
+                    <div class="preview-card">
+                        <div class="preview-icon">👤</div>
+                        <div class="preview-name">@(string.IsNullOrEmpty(KhachHangModel.TenKH) ? "Tên Khách Hàng" : KhachHangModel.TenKH)</div>
+                        <div class="preview-info">
+                            <div>📍 @(string.IsNullOrEmpty(KhachHangModel.DiaChi) ? "Địa chỉ" : KhachHangModel.DiaChi)</div>
+                            <div>📱 @(string.IsNullOrEmpty(KhachHangModel.SoDienThoai) ? "Số điện thoại" : KhachHangModel.SoDienThoai)</div>
+                            <div>📧 @(string.IsNullOrEmpty(KhachHangModel.Email) ? "Email" : KhachHangModel.Email)</div>
+                            <div>⭐ Hạng: @(LoaiThanhVienModels.FirstOrDefault(f => f.MaLoaiTV == KhachHangModel.MaLoaiTV)?.TenLoaiTV ?? "Chưa chọn")</div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <span class="status success" style="background: rgba(255,255,255,0.3); color: white;">
+                                @(KhachHangModel.TrangThai ? "Đang hoạt động" : "Ngừng hoạt động")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/KhachHang"))">❌ Hủy Bỏ</button>
+                    <button type="submit" class="btn btn-primary">✓ Lưu Thay Đổi</button>
+                </div>
+            </EditForm>
+        }
+        else if (!IsError)
+        {
+            <div style="text-align: center; padding: 50px;">
+                <p>⌛ Đang tải dữ liệu khách hàng...</p>
+            </div>
+        }
+    </div>
+</div>

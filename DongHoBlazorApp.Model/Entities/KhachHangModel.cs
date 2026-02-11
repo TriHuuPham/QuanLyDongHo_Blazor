@@ -9,5 +9,6 @@
         public string Email { get; set; }
         public int MaLoaiTV { get; set; }
         public string GhiChu { get; set; }
+        public bool TrangThai { get; set; }
     }
 }
