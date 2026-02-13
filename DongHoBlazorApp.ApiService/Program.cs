@@ -1,4 +1,5 @@
-﻿using DongHoBlazorApp.BL.Reposities.BinhLuan;
+﻿using DongHoBlazorApp.BL.Reposities.BaoCao;
+using DongHoBlazorApp.BL.Reposities.BinhLuan;
 using DongHoBlazorApp.BL.Reposities.ChiTietPhieuNhap;
 using DongHoBlazorApp.BL.Reposities.DongHo;
 using DongHoBlazorApp.BL.Reposities.KhachHang;
@@ -7,6 +8,7 @@ using DongHoBlazorApp.BL.Reposities.NhaCungCap;
 using DongHoBlazorApp.BL.Reposities.PhanLoai;
 using DongHoBlazorApp.BL.Reposities.PhieuNhap;
 using DongHoBlazorApp.BL.Reposities.ThuongHieu;
+using DongHoBlazorApp.BL.Services.BaoCao;
 using DongHoBlazorApp.BL.Services.BinhLuan;
 using DongHoBlazorApp.BL.Services.ChiTietPhieuNhap;
 using DongHoBlazorApp.BL.Services.DongHo;
@@ -53,6 +55,8 @@ builder.Services.AddScoped<ILoaiThanhVienService, LoaiThanhVienService>();
 builder.Services.AddScoped<ILoaiThanhVienRepository, LoaiThanhVienRepository>();
 builder.Services.AddScoped<IKhachHangService, KhachHangService>();
 builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<IBaoCaoService, BaoCaoService>();
+builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
 // --------------- Kết thúc phần đăng ký dịch vụ ở đây ----------------
 
 

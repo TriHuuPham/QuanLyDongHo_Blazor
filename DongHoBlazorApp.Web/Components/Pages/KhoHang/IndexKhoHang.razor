@@ -219,7 +219,7 @@
         <div class="stat-card green">
             <div class="stat-icon">💰</div>
             <div class="stat-info">
-                <h3>@TotalValue.ToString("N0") VNĐ</h3>
+                <h3>@(TotalValue.ToString("N0") + " ₫")</h3>
                 <p>Giá Trị Kho</p>
                 <span class="stat-change positive">Dựa trên giá bán</span>
             </div>
@@ -310,8 +310,8 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>@item.GiaBan.ToString("N0") VNĐ</td>
-                                <td><strong style="color: #667eea;">@((item.GiaBan * item.SoLuongTon).ToString("N0")) VNĐ</strong></td>
+                                <td>@(item.GiaBan.ToString("N0") + " ₫")</td>
+                                <td><strong style="color: #667eea;">@((item.GiaBan * item.SoLuongTon).ToString("N0") + " ₫")</strong></td>
                                 <td>
                                     <span class="status @statusClass">
                                         <span class="status-dot"></span>
@@ -346,7 +346,7 @@
                 </div>
                 <div style="text-align: right;">
                     <p style="color: #95a5a6; font-size: 11px; margin-bottom: 5px; letter-spacing: 1px;">TỔNG GIÁ TRỊ HIỂN THỊ</p>
-                    <p style="color: #667eea; font-size: 20px; font-weight: 700;">@FilteredDongHoModels.Sum(s => s.GiaBan * s.SoLuongTon).ToString("N0") VNĐ</p>
+                    <p style="color: #667eea; font-size: 20px; font-weight: 700;">@(FilteredDongHoModels.Sum(s => s.GiaBan * s.SoLuongTon).ToString("N0") + " ₫")</p>
                 </div>
             </div>
         </div>

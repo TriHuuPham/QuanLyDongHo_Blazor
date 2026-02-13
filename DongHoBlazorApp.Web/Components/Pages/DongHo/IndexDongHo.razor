@@ -338,7 +338,7 @@
             <div class="stat-card green">
                 <div class="stat-icon">💰</div>
                 <div class="stat-info">
-                    <h3>@checkTongGiaTri.ToString("N0")đ</h3>
+                    <h3>@(checkTongGiaTri.ToString("N0") + " ₫")</h3>
                     <p>Tổng Giá Trị</p>
                     <span class="stat-change positive">+18%</span>
                 </div>
@@ -429,7 +429,7 @@
                         <div class="watch-brand">@(thuongHieu?.TenThuongHieu ?? "Unknown")</div>
                         <h3 class="watch-name">@item.TenDongHo</h3>
                         <span class="watch-code">#@item.MaDongHo</span>
-                        <div class="watch-price">@item.GiaBan.ToString("N0")đ</div>
+                        <div class="watch-price">@(item.GiaBan.ToString("N0") + " ₫")</div>
                         <div class="watch-stats">
                             <div class="stat">
                                 <div class="stat-value">@item.SoLuongTon</div>

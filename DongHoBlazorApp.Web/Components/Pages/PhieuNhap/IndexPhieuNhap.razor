@@ -239,7 +239,7 @@
             <div class="stat-card orange">
                 <div class="stat-icon">💰</div>
                 <div class="stat-info">
-                    <h3>@PhieuNhaps.Sum(p => p.TongTien).ToString("N0") ₫</h3>
+                    <h3>@(PhieuNhaps.Sum(p => p.TongTien).ToString("N0") + " ₫")</h3>
                     <p>Tổng Giá Trị</p>
                     <span class="stat-change positive">@PhieuNhaps.Count() phiếu nhập</span>
                 </div>
@@ -304,7 +304,7 @@
                             <td>@nccName</td>
                             <td><span class="invoice-date">@p.NgayNhap.ToString("dd/MM/yyyy")</span></td>
                             <td>@ChiTietPhieuNhapModels.Where(ct => ct.MaPhieuNhap == p.MaPhieuNhap).Sum(ct => ct.SoLuongNhap) sản phẩm</td>
-                            <td><span class="invoice-price">@p.TongTien.ToString("N0") ₫</span></td>
+                            <td><span class="invoice-price">@(p.TongTien.ToString("N0") + " ₫")</span></td>
                             <td><span class="status-badge @statusClass">@p.TrangThaiNhap</span></td>
                             <td>
                                 <div class="action-btns">
