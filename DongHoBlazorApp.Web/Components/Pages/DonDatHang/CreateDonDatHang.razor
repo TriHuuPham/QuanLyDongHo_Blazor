@@ -1,446 +1,344 @@
-﻿@page "/CreateDonHang"
-@rendermode InteractiveServer
-@inject NavigationManager NavigationManager
-<PageTitle>Trang chủ đơn hàng</PageTitle>
+﻿@page "/TaoDonHang"
+@using DongHoBlazorApp.Model.Entities
 
-<style>
-    .form-container {
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    .form-section {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .section-title {
-        font-size: 20px;
-        color: #2c3e50;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #e1e8ed;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .form-row-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 20px;
-    }
-
-    .form-row-4 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-        gap: 20px;
-    }
-
-    /* Customer Search */
-    .customer-search {
-        position: relative;
-    }
-
-    .customer-dropdown {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: white;
-        border: 1px solid #e1e8ed;
-        border-radius: 8px;
-        max-height: 300px;
-        overflow-y: auto;
-        display: none;
-        z-index: 100;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        margin-top: 5px;
-    }
-
-        .customer-dropdown.show {
-            display: block;
-        }
-
-    .customer-item {
-        padding: 12px 15px;
-        cursor: pointer;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background 0.2s;
-    }
-
-        .customer-item:hover {
-            background: #f8f9fa;
-        }
-
-        .customer-item:last-child {
-            border-bottom: none;
-        }
-
-    .customer-name {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 3px;
-    }
-
-    .customer-info {
-        font-size: 12px;
-        color: #95a5a6;
-    }
-
-    .selected-customer {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 15px;
-        border-left: 4px solid #667eea;
-    }
-
-        .selected-customer p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-    /* Product Table */
-    .product-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-    }
-
-        .product-table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .product-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e1e8ed;
-        }
-
-        .product-table input, .product-table select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e1e8ed;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-            .product-table input:focus, .product-table select:focus {
-                border-color: #667eea;
-                outline: none;
-            }
-
-    .btn-add-row {
-        background: linear-gradient(135deg, #38ef7d 0%, #11998e 100%);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        margin: 10px 0;
-    }
-
-    .btn-remove-row {
-        background: #f5576c;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-    }
-
-    /* Summary */
-    .summary-box {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 25px;
-        border-radius: 15px;
-        margin-top: 20px;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #dee2e6;
-        font-size: 16px;
-    }
-
-        .summary-row:last-child {
-            border-bottom: none;
-            padding-top: 15px;
-            margin-top: 10px;
-            border-top: 2px solid #667eea;
-        }
-
-    .summary-label {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .summary-value {
-        font-weight: 700;
-        color: #667eea;
-        font-size: 18px;
-    }
-
-    .summary-row:last-child .summary-value {
-        font-size: 28px;
-        color: #27ae60;
-    }
-
-    /* Alerts */
-    .alert {
-        padding: 15px 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        display: none;
-        animation: slideIn 0.3s ease;
-    }
-    @@keyframes slideIn {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .alert.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .alert.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .required-mark {
-        color: #f5576c;
-        font-weight: bold;
-    }
-
-    .form-help {
-        font-size: 13px;
-        color: #95a5a6;
-        margin-top: 5px;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: flex-end;
-        padding: 20px 0;
-    }
-
-    .discount-input {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .discount-type {
-        width: 100px;
-    }
-
-    .stock-info {
-        font-size: 12px;
-        color: #95a5a6;
-        margin-top: 5px;
-    }
-
-    .stock-warning {
-        color: #f5576c;
-    }
-
-    .stock-ok {
-        color: #27ae60;
-    }
-</style>
+<PageTitle>Tạo Đơn Hàng Mới</PageTitle>
 
 <div class="main-content">
     <header class="top-header">
         <div class="header-left">
             <h1>Tạo Đơn Hàng Mới</h1>
-            <p class="breadcrumb">
-                <a href="index.html" style="color: #667eea; text-decoration: none;">Dashboard</a> /
-                <a href="orders.html" style="color: #667eea; text-decoration: none;">Đơn Hàng</a> /
-                Tạo Mới
-            </p>
+            <p class="breadcrumb">Đơn Hàng / Tạo Mới</p>
         </div>
         <div class="header-right">
-            <button class="btn btn-secondary" onclick="window.location.href='orders.html'">← Quay Lại</button>
+            <button class="btn btn-outline" @onclick="@(() => NavigationManager.NavigateTo("/DonHang"))">
+                <span>✕</span> Hủy Bỏ
+            </button>
+            <button class="btn btn-primary" @onclick="HandleSubmit">
+                <span>✓</span> Tạo Đơn Hàng
+            </button>
         </div>
     </header>
 
-    <div id="alertSuccess" class="alert success"><strong>✓ Thành công!</strong> Đơn hàng đã được tạo thành công.</div>
-    <div id="alertError" class="alert error"><strong>✗ Lỗi!</strong> <span id="errorMessage">Vui lòng kiểm tra lại thông tin.</span></div>
-
-    <div class="form-container">
-        <form id="orderForm">
-            <!-- Order Info (DonDatHangs table) -->
-            <div class="form-section">
-                <h3 class="section-title">📝 Thông Tin Đơn Hàng</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Mã Đơn Hàng <span class="required-mark">*</span></label>
-                        <input type="text" class="form-control" id="maDonDH" placeholder="Tự động tạo" readonly style="background: #f8f9fa;">
-                        <p class="form-help">🔒 Mã sẽ được tạo tự động</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Ngày Đặt <span class="required-mark">*</span></label>
-                        <input type="datetime-local" class="form-control" id="ngayDat" required>
-                        <p class="form-help">📅 Thời gian đặt hàng</p>
-                    </div>
-                </div>
+    <div class="create-grid">
+        <!-- Thông Tin Chung -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Thông Tin Chung</h3>
             </div>
-
-            <!-- Customer Selection (MaKH) -->
-            <div class="form-section">
-                <h3 class="section-title">👤 Thông Tin Khách Hàng</h3>
-                <div class="form-group customer-search">
-                    <label class="form-label">Tìm Khách Hàng <span class="required-mark">*</span></label>
-                    <input type="text" class="form-control" id="customerSearch" placeholder="Nhập tên, email hoặc SĐT khách hàng..." oninput="searchCustomer()" autocomplete="off" required>
-                    <div class="customer-dropdown" id="customerDropdown"></div>
-                    <p class="form-help">🔍 Gõ để tìm kiếm khách hàng</p>
-                </div>
-                <div id="selectedCustomerInfo" style="display: none;">
-                    <div class="selected-customer">
-                        <p><strong>Khách hàng:</strong> <span id="selectedCustomerName"></span></p>
-                        <p><strong>Email:</strong> <span id="selectedCustomerEmail"></span></p>
-                        <p><strong>SĐT:</strong> <span id="selectedCustomerPhone"></span></p>
-                        <p><strong>Địa chỉ:</strong> <span id="selectedCustomerAddress"></span></p>
-                        <input type="hidden" id="maKH">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Shipping Address -->
-            <div class="form-section">
-                <h3 class="section-title">📍 Địa Chỉ Giao Hàng</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Phường/Thị Trấn</label>
-                        <input type="text" class="form-control" id="phuongThucThanhToan" placeholder="Nhập phường/thị trấn">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Phương Thức Giao Hàng</label>
-                        <input type="text" class="form-control" id="phuongThucGiaoHang" placeholder="Ví dụ: Giao hàng nhanh, Giao hàng tiết kiệm">
-                    </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Mã Đơn Hàng</label>
+                    <input type="text" class="form-control" value="Sẽ được tạo tự động" disabled>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Tình Trạng</label>
-                    <select class="form-control" id="tinhTrang">
-                        <option value="">-- Chọn tình trạng --</option>
-                        <option value="Chờ xác nhận" selected>Chờ xác nhận</option>
+                    <label>Ngày Đặt</label>
+                    <input type="date" class="form-control" @bind="Order.NgayDat">
+                </div>
+                <div class="form-group">
+                    <label>Trạng Thái</label>
+                    <select class="form-control" @bind="Order.TinhTrang">
+                        <option value="Đang xử lý">Đang xử lý</option>
                         <option value="Đã xác nhận">Đã xác nhận</option>
-                        <option value="Đang chuẩn bị">Đang chuẩn bị</option>
                         <option value="Đang giao">Đang giao</option>
                         <option value="Hoàn thành">Hoàn thành</option>
-                        <option value="Đã hủy">Đã hủy</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Trạng Thái</label>
-                    <select class="form-control" id="trangThai">
-                        <option value="1" selected>Đang hoạt động</option>
-                        <option value="0">Đã hủy</option>
+                    <label>Thanh Toán</label>
+                    <select class="form-control" @bind="Order.DaThanhToan">
+                        <option value="false">Chưa thanh toán</option>
+                        <option value="true">Đã thanh toán</option>
                     </select>
                 </div>
             </div>
+        </div>
 
-            <!-- Products (ChiTietDonDHs table) -->
-            <div class="form-section">
-                <h3 class="section-title">📦 Chi Tiết Sản Phẩm</h3>
-                <div style="overflow-x: auto;">
-                    <table class="product-table" id="productTable">
-                        <thead>
+        <!-- Khách Hàng -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Khách Hàng</h3>
+            </div>
+            <div class="customer-search-section">
+                <div class="search-input-wrapper" style="position: relative;">
+                    <input type="text" class="form-control" placeholder="Tìm tên, SĐT hoặc email khách hàng..." 
+                           @oninput="HandleCustomerSearch" @bind-value="CustomerSearchTerm">
+                    
+                    @if (ShowCustomerResults)
+                    {
+                        <div class="search-results-dropdown">
+                            @foreach (var customer in CustomerSearchResults)
+                            {
+                                <div class="search-result-item" @onclick="() => SelectCustomer(customer)">
+                                    <div class="res-info">
+                                        <strong>@customer.TenKH</strong>
+                                        <span>@customer.SoDienThoai | @customer.Email</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (SelectedCustomer != null)
+                {
+                    <div class="selected-customer-info">
+                        <div class="customer-avatar">@SelectedCustomer.TenKH[0]</div>
+                        <div class="customer-details">
+                            <h4>@SelectedCustomer.TenKH</h4>
+                            <p>@SelectedCustomer.SoDienThoai</p>
+                            <p>@SelectedCustomer.Email</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Địa Chỉ Giao Hàng -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h3>Địa Chỉ Giao Hàng</h3>
+            </div>
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label>Địa Chỉ Chi Tiết</label>
+                    <input type="text" class="form-control" placeholder="Số nhà, tên đường..." @bind="Order.DiaChiGiaoHang">
+                </div>
+                <div class="form-group">
+                    <label>Ngày Giao Dự Kiến</label>
+                    <input type="date" class="form-control" @bind="Order.NgayGiao">
+                </div>
+                <div class="form-group">
+                    <label>Ghi Chú</label>
+                    <textarea class="form-control" placeholder="Lưu ý cho người giao hàng..." rows="1"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi Tiết Sản Phẩm -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h3>Chi Tiết Sản Phẩm</h3>
+                <button class="btn btn-secondary btn-sm" @onclick="AddRow">+ Thêm Sản Phẩm</button>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="50px">STT</th>
+                            <th>Sản Phẩm</th>
+                            <th width="150px">Số Lượng</th>
+                            <th width="200px">Đơn Giá</th>
+                            <th width="200px">Thành Tiền</th>
+                            <th width="80px">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < OrderItems.Count; i++)
+                        {
+                            var index = i;
+                            var item = OrderItems[index];
                             <tr>
-                                <th style="width: 40px;">STT</th>
-                                <th style="width: 280px;">Đồng Hồ <span class="required-mark">*</span></th>
-                                <th style="width: 100px;">Số Lượng <span class="required-mark">*</span></th>
-                                <th style="width: 130px;">Đơn Giá <span class="required-mark">*</span></th>
-                                <th style="width: 130px;">Thành Tiền</th>
-                                <th style="width: 80px;">Xóa</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody">
-                            <tr class="product-row">
-                                <td class="row-number">1</td>
+                                <td>@(index + 1)</td>
                                 <td>
-                                    <select class="product-select" required onchange="updateProductPrice(this)">
-                                        <option value="">-- Chọn đồng hồ --</option>
-                                        <option value="DH-001" data-price="12500" data-stock="45">Rolex Submariner Date 126610LN ($12,500)</option>
-                                        <option value="DH-002" data-price="6800" data-stock="32">Omega Seamaster 300M ($6,800)</option>
-                                        <option value="DH-003" data-price="850" data-stock="85">Seiko Prospex Diver's 200M ($850)</option>
-                                        <option value="DH-004" data-price="9200" data-stock="0">Rolex Lady-Datejust 28 ($9,200) - HẾT HÀNG</option>
-                                        <option value="DH-005" data-price="3200" data-stock="52">Tag Heuer Carrera ($3,200)</option>
-                                    </select>
-                                    <div class="stock-info"></div>
+                                    <div class="product-search-cell" style="position: relative;">
+                                        <input type="text" class="form-control" placeholder="Tìm sản phẩm..." 
+                                               @bind-value="item.ProductName"
+                                               @oninput="(e) => HandleProductSearch(index, e)">
+                                        
+                                        @if (ActiveRowIndex == index && ProductSearchResults.Any())
+                                        {
+                                            <div class="search-results-dropdown">
+                                                @foreach (var prod in ProductSearchResults)
+                                                {
+                                                    <div class="search-result-item" @onclick="() => SelectProduct(index, prod)">
+                                                        <div class="res-info">
+                                                            <strong>@prod.TenDongHo</strong>
+                                                            <span>Giá: @prod.GiaBan.ToString("#,### ₫") | Kho: @prod.SoLuongTon</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
                                 </td>
-                                <td><input type="number" class="quantity-input" min="1" value="1" required oninput="updateRowTotal(this)"></td>
-                                <td><input type="number" class="price-input" min="0" step="0.01" placeholder="0.00" required oninput="updateRowTotal(this)" readonly style="background: #f8f9fa;"></td>
-                                <td><input type="text" class="total-input" readonly style="background: #f8f9fa; font-weight: 600; color: #27ae60;"></td>
-                                <td><button type="button" class="btn-remove-row" onclick="removeRow(this)">🗑️</button></td>
+                                <td>
+                                    <div class="qty-input">
+                                        <button class="qty-btn" @onclick="() => { if(item.Quantity > 1) item.Quantity--; }">-</button>
+                                        <input type="number" class="form-control text-center" @bind="item.Quantity">
+                                        <button class="qty-btn" @onclick="() => item.Quantity++">+</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" value="@item.UnitPrice.ToString("#,### ₫")" disabled>
+                                </td>
+                                <td>
+                                    <strong>@item.Subtotal.ToString("#,### ₫")</strong>
+                                </td>
+                                <td>
+                                    <button class="btn-delete" @onclick="() => RemoveRow(index)">🗑️</button>
+                                </td>
                             </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <button type="button" class="btn-add-row" onclick="addRow()">➕ Thêm Sản Phẩm</button>
+                        }
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Summary -->
-            <div class="form-section">
-                <h3 class="section-title">💰 Tổng Kết Đơn Hàng</h3>
-                <div class="summary-box">
-                    <div class="summary-row">
-                        <span class="summary-label">Tổng Số Lượng:</span>
-                        <span class="summary-value" id="totalQuantity">0</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Tổng Số Mặt Hàng:</span>
-                        <span class="summary-value" id="totalItems">1</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">Tạm Tính:</span>
-                        <span class="summary-value" id="subtotal">$0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-label">TỔNG TIỀN:</span>
-                        <span class="summary-value" id="grandTotal">$0.00</span>
-                    </div>
+            <!-- Tổng Kết -->
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span>Tổng số lượng:</span>
+                    <strong>@TotalQuantity</strong>
+                </div>
+                <div class="summary-row grand-total">
+                    <span>Tổng cộng:</span>
+                    <h2 class="price-text">@TotalAmount.ToString("#,### ₫")</h2>
                 </div>
             </div>
-
-            <!-- Actions -->
-            <div class="action-buttons">
-                <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/DonHang"))">❌ Hủy Bỏ</button>
-                <button type="submit" class="btn btn-primary">✓ Tạo Đơn Hàng</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
+
+<style>
+    .search-results-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 1000;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .search-result-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .search-result-item:hover {
+        background: #f8f9fa;
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .res-info strong {
+        display: block;
+        color: #333;
+    }
+
+    .res-info span {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .selected-customer-info {
+        margin-top: 15px;
+        padding: 15px;
+        background: #f3f0ff;
+        border-radius: 8px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .customer-avatar {
+        width: 45px;
+        height: 45px;
+        background: #7c3aed;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .customer-details h4 {
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .customer-details p {
+        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .price-text {
+        color: #7c3aed;
+        margin: 0;
+    }
+
+    .order-summary {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .summary-row {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .grand-total {
+        margin-top: 5px;
+    }
+
+    .create-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .full-width {
+        grid-column: span 2;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #7c3aed;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>

@@ -54,11 +54,11 @@ namespace DongHoBlazorApp.BL.Services.DonDHang
             }
         }
 
-        public Task<int> CreateDonDatHang(DonDatHangModel donDatHangModel)
+        public Task<int> CreateDonDatHangComplex(CreateOrderRequestDTO request)
         {
             try
             {
-                return donDatHangRepository.CreateDonDatHang(donDatHangModel);
+                return donDatHangRepository.CreateDonDatHangComplex(request);
             }
             catch (Exception ex)
             {

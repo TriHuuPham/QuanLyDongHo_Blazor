@@ -105,16 +105,30 @@ namespace DongHoBlazorApp.BL.Reposities.DonDHang
             }
         }
 
-        public async Task<int> CreateDonDatHang(DonDatHangModel donDatHangModel)
+        public async Task<int> CreateDonDatHangComplex(CreateOrderRequestDTO request)
         {
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
             try
             {
-                var entry = await dbContext.DonDatHangs.AddAsync(donDatHangModel);
+                var entry = await dbContext.DonDatHangs.AddAsync(request.Order);
                 await dbContext.SaveChangesAsync();
-                return entry.Entity.MaDonDH;
+
+                int maDonDH = entry.Entity.MaDonDH;
+
+                foreach (var detail in request.Details)
+                {
+                    detail.MaDonDH = maDonDH;
+                    await dbContext.ChiTietDonDHs.AddAsync(detail);
+                }
+
+                await dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return maDonDH;
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 throw;
             }
         }

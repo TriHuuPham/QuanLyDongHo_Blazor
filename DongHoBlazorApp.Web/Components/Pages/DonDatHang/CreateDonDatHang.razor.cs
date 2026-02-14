@@ -19,7 +19,10 @@ namespace DongHoBlazorApp.Web.Components.Pages.DonDatHang
             NgayDat = DateTime.Now,
             TinhTrang = "Đang xử lý",
             NgayGiao = DateTime.Now.AddDays(3),
-            DaThanhToan = false
+            DaThanhToan = false,
+            PhuongThucThanhToan = "Tiền mặt",
+            PhuongThucGiaoHang = "Giao hàng nhanh",
+            TrangThai = true
         };
 
         private KhachHangModel? SelectedCustomer { get; set; }
@@ -28,7 +31,6 @@ namespace DongHoBlazorApp.Web.Components.Pages.DonDatHang
         private bool ShowCustomerResults { get; set; } = false;
 
         private List<OrderDetailRow> OrderItems { get; set; } = new() { new OrderDetailRow() };
-        private string ProductSearchTerm { get; set; } = string.Empty;
         private List<DongHoModel> ProductSearchResults { get; set; } = new();
         private int ActiveRowIndex { get; set; } = -1;
 
@@ -113,42 +115,43 @@ namespace DongHoBlazorApp.Web.Components.Pages.DonDatHang
         {
             if (SelectedCustomer == null)
             {
-                // Should show error message
+                Console.WriteLine("Please select a customer.");
                 return;
             }
 
             if (!OrderItems.Any(i => i.ProductId > 0))
             {
-                // Should show error message
+                Console.WriteLine("Please add at least one product.");
                 return;
             }
 
             try
             {
-                // 1. Create Order
-                var orderRes = await ApiClient.PostAsJsonAsync("/api/DonDatHang", Order);
-                var orderBaseRes = await orderRes.Content.ReadFromJsonAsync<BaseReponseModel>();
-
-                if (orderBaseRes != null && orderBaseRes.Success)
+                var request = new CreateOrderRequestDTO
                 {
-                    int maDonDH = Convert.ToInt32(orderBaseRes.Data);
-
-                    // 2. Create Order Details
-                    foreach (var item in OrderItems.Where(i => i.ProductId > 0))
-                    {
-                        var chiTiet = new ChiTietDonDHModel
+                    Order = Order,
+                    Details = OrderItems
+                        .Where(i => i.ProductId > 0)
+                        .Select(i => new ChiTietDonDHModel
                         {
-                            MaDonDH = maDonDH,
-                            MaDongHo = item.ProductId,
-                            TenDongHo = item.ProductName,
-                            SoLuong = item.Quantity,
-                            DonGia = item.UnitPrice
-                        };
-                        // Since we don't have ChiTietDonDHController yet in our notes/list_dir but it exists in the system
-                        await ApiClient.PostAsJsonAsync("/api/ChiTietDonDH", chiTiet);
-                    }
+                            MaDongHo = i.ProductId,
+                            TenDongHo = i.ProductName,
+                            SoLuong = i.Quantity,
+                            DonGia = i.UnitPrice
+                        }).ToList()
+                };
 
+                var res = await ApiClient.PostAsJsonAsync("/api/DonDatHang/complex", request);
+                var baseRes = await res.Content.ReadFromJsonAsync<BaseReponseModel>();
+
+                if (baseRes != null && baseRes.Success)
+                {
+                    int maDonDH = Convert.ToInt32(baseRes.Data);
                     NavigationManager.NavigateTo($"/ChiTietDonHang/{maDonDH}");
+                }
+                else
+                {
+                    Console.WriteLine($"Error: {baseRes?.ErrorMessage}");
                 }
             }
             catch (Exception ex)
@@ -161,7 +164,7 @@ namespace DongHoBlazorApp.Web.Components.Pages.DonDatHang
         {
             public int ProductId { get; set; }
             public string ProductName { get; set; } = string.Empty;
-            public int Quantity { get; set; }
+            public int Quantity { get; set; } = 1;
             public decimal UnitPrice { get; set; }
             public decimal Subtotal => Quantity * UnitPrice;
         }

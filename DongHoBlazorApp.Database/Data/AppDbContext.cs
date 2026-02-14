@@ -186,6 +186,8 @@ namespace DongHoBlazorApp.Database.Data
                 eb.HasKey(x => x.MaDonDH);
                 eb.Property(x => x.MaDonDH).ValueGeneratedOnAdd();
                 eb.Property(x => x.NgayDat).HasDefaultValueSql("GETDATE()");
+                eb.Property(x => x.NgayGiao).HasColumnType("datetime");
+                eb.Property(x => x.DiaChiGiaoHang).HasMaxLength(2000);
                 eb.Property(x => x.PhuongThucThanhToan).HasMaxLength(500);
                 eb.Property(x => x.PhuongThucGiaoHang).HasMaxLength(500);
                 eb.HasOne<KhachHangModel>()

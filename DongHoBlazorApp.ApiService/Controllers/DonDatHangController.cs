@@ -65,12 +65,12 @@ namespace DongHoBlazorApp.ApiService.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<ActionResult> CreateDonDatHang([FromBody] DonDatHangModel donDatHangModel)
+        [HttpPost("complex")]
+        public async Task<ActionResult> CreateDonDatHangComplex([FromBody] CreateOrderRequestDTO request)
         {
             try
             {
-                var result = await donDatHangService.CreateDonDatHang(donDatHangModel);
+                var result = await donDatHangService.CreateDonDatHangComplex(request);
                 return Ok(new { Success = true, Data = result, ErrorMessage = "" });
             }
             catch (Exception ex)

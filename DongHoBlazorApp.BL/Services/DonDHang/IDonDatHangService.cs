@@ -9,7 +9,7 @@ namespace DongHoBlazorApp.BL.Services.DonDHang
         Task<DonDatHangModel> GetDonDatHangById(int maDonDH);
         Task<DonDatHangDetailDTO> GetDonDatHangDetail(int maDonDH);
         Task<DonDatHangStatsDTO> GetDonDatHangStats();
-        Task<int> CreateDonDatHang(DonDatHangModel donDatHangModel);
+        Task<int> CreateDonDatHangComplex(CreateOrderRequestDTO request);
         Task<int> UpdateDonDatHang(DonDatHangModel donDatHangModel);
         Task<int> DeleteDonDatHang(int maDonDH);
     }
