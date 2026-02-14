@@ -7,14 +7,12 @@ namespace DongHoBlazorApp.BL.Services.DongHo
     {
         public Task<List<DongHoModel>> GetDongHos()
         {
-            try
-            {
-                return dongHoRepository.GetDongHos();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return dongHoRepository.GetDongHos();
+        }
+
+        public Task<List<DongHoModel>> SearchDongHos(string searchTerm)
+        {
+            return dongHoRepository.SearchDongHos(searchTerm);
         }
 
         public Task<DongHoModel> GetDongHoById(int maDH)

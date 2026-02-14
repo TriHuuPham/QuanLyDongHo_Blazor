@@ -8,15 +8,20 @@ namespace DongHoBlazorApp.BL.Reposities.KhachHang
     {
         public Task<List<KhachHangModel>> GetKhachHangs()
         {
-            try
+            return dbContext.KhachHangs.ToListAsync();
+        }
+
+        public Task<List<KhachHangModel>> SearchKhachHangs(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return dbContext.KhachHangs
-                    .ToListAsync();
+                return dbContext.KhachHangs.Take(10).ToListAsync();
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
+
+            return dbContext.KhachHangs
+                .Where(k => k.TenKH.Contains(searchTerm) || k.SoDienThoai.Contains(searchTerm) || k.Email.Contains(searchTerm))
+                .Take(20)
+                .ToListAsync();
         }
 
         public Task<KhachHangModel> GetKhachHangById(int maKH)

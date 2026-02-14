@@ -4,73 +4,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DongHoBlazorApp.BL.Reposities.DongHo
 {
-    public class DongHoRepository(AppDbContext DbContext) : IDongHoRepository
+    public class DongHoRepository(AppDbContext dbContext) : IDongHoRepository
     {
         public Task<List<DongHoModel>> GetDongHos()
         {
-            try
+            return dbContext.DongHos.ToListAsync();
+        }
+
+        public Task<List<DongHoModel>> SearchDongHos(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return DbContext.DongHos
-                    .ToListAsync();
+                return dbContext.DongHos.Take(10).ToListAsync();
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
+
+            return dbContext.DongHos
+                .Where(d => d.TenDongHo.Contains(searchTerm) || d.MaDongHo.ToString().Contains(searchTerm))
+                .Take(20)
+                .ToListAsync();
         }
 
         public Task<DongHoModel> GetDongHoById(int maDH)
         {
-            try
-            {
-                return DbContext.DongHos
-                    .FirstOrDefaultAsync(dh => dh.MaDongHo == maDH);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return dbContext.DongHos
+                .FirstOrDefaultAsync(dh => dh.MaDongHo == maDH);
         }
 
         public async Task<DongHoModel> CreateDongHo(DongHoModel dongHoModel)
         {
-            try
-            {
-                var entry = await DbContext.DongHos.AddAsync(dongHoModel);
-                await DbContext.SaveChangesAsync();
-                return entry.Entity;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            var entry = await dbContext.DongHos.AddAsync(dongHoModel);
+            await dbContext.SaveChangesAsync();
+            return entry.Entity;
         }
 
         public async Task DeleteDongHo(DongHoModel dongHoModel)
         {
-            try
-            {
-                DbContext.DongHos.Remove(dongHoModel);
-                await DbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            dbContext.DongHos.Remove(dongHoModel);
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<DongHoModel> UpdateDongHo(DongHoModel dongHoModel)
         {
-            try
-            {
-                var entry = DbContext.DongHos.Update(dongHoModel);
-                await DbContext.SaveChangesAsync();
-                return entry.Entity;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            var entry = dbContext.DongHos.Update(dongHoModel);
+            await dbContext.SaveChangesAsync();
+            return entry.Entity;
         }
     }
 }

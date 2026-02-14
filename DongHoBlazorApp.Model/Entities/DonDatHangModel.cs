@@ -7,7 +7,7 @@
         public DateTime NgayDat { get; set; }
         public string PhuongThucThanhToan { get; set; }
         public string PhuongThucGiaoHang { get; set; }
-        public int TinhTrang { get; set; }
+        public string TinhTrang { get; set; }
         public bool TrangThai { get; set; }
     }
 }

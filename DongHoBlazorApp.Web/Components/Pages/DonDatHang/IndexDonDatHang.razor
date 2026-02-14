@@ -1,0 +1,174 @@
+﻿@code {
+    void goToCreate()
+    {
+        NavigationManager.NavigateTo("/CreateDonHang");
+    }
+}
+@page "/DonHang"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+<PageTitle>Trang chủ đơn hàng</PageTitle>
+
+<div class="main-content">
+    <header class="top-header">
+        <div class="header-left">
+            <h1>Quản Lý Đơn Hàng</h1>
+            <p class="breadcrumb">Trang Chủ / Đơn Hàng</p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" @onclick="goToCreate">+ Tạo Đơn Hàng Mới</button>
+        </div>
+    </header>
+
+    <!-- Order Stats -->
+    <div class="stats-grid">
+        <div class="stat-card purple">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-info">
+                <h3>@Stats.TotalOrders.ToString("N0")</h3>
+                <p>Tổng Đơn Hàng</p>
+                @* <span class="stat-change positive">+8% tháng này</span> *@
+            </div>
+        </div>
+        <div class="stat-card blue">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+                <h3>@Stats.ProcessingOrders.ToString("N0")</h3>
+                <p>Đang Xử Lý</p>
+                @* <span class="stat-change positive">+5%</span> *@
+            </div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>@Stats.CompletedOrders.ToString("N0")</h3>
+                <p>Đã Hoàn Thành</p>
+                @* <span class="stat-change positive">+12%</span> *@
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <h3>@Stats.CancelledOrders.ToString("N0")</h3>
+                <p>Đã Hủy</p>
+                @* <span class="stat-change negative">-3%</span> *@
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" placeholder="Tìm kiếm đơn hàng..." @oninput="HandleSearch" value="@SearchTerm">
+                <span class="search-icon">🔍</span>
+            </div>
+            <select class="filter-select" @onchange="HandleStatusChange" value="@SelectedStatus">
+                <option value="Tất cả trạng thái">Tất cả trạng thái</option>
+                <option value="Đang xử lý">Đang xử lý</option>
+                <option value="Đã xác nhận">Đã xác nhận</option>
+                <option value="Đang giao">Đang giao</option>
+                <option value="Hoàn thành">Hoàn thành</option>
+                <option value="Đã hủy">Đã hủy</option>
+            </select>
+            @* <select class="filter-select">
+                <option>Hôm nay</option>
+                <option>7 ngày qua</option>
+                <option>30 ngày qua</option>
+                <option>Tháng này</option>
+                <option>Tùy chỉnh</option>
+            </select> *@
+            <button class="btn btn-secondary">Xuất Excel</button>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox"></th>
+                        <th>Mã ĐH</th>
+                        <th>Khách Hàng</th>
+                        <th>Sản Phẩm</th>
+                        <th>Số Lượng</th>
+                        <th>Ngày Đặt</th>
+                        <th>Tổng Tiền</th>
+                        <th>Trạng Thái</th>
+                        <th>Thanh Toán</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (L_DonDatHang != null && L_DonDatHang.Any())
+                    {
+                        @foreach (var item in L_DonDatHang)
+                        {
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td><strong>#ORD-@item.MaDonDH.ToString("D3")</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 35px; height: 35px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 12px;">
+                                            @item.MaKH
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600;">Khách hàng #@item.MaKH</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Đồng hồ</td>
+                                <td>1</td>
+                                <td>@item.NgayDat.ToString("dd/MM/yyyy")<br><span style="color: #95a5a6; font-size: 12px;">@item.NgayDat.ToString("hh:mm tt")</span></td>
+                                <td><strong style="color: #667eea;">$0</strong></td>
+                                <td>
+                                    <select class="filter-select" style="padding: 5px; font-size: 12px;" @onchange="@(e => UpdateStatus(item, e.Value.ToString()))">
+                                        <option value="Đang xử lý" selected="@(item.TinhTrang == "Đang xử lý")">Đang xử lý</option>
+                                        <option value="Đã xác nhận" selected="@(item.TinhTrang == "Đã xác nhận")">Đã xác nhận</option>
+                                        <option value="Đang giao" selected="@(item.TinhTrang == "Đang giao")">Đang giao</option>
+                                        <option value="Hoàn thành" selected="@(item.TinhTrang == "Hoàn thành")">Hoàn thành</option>
+                                        <option value="Đã hủy" selected="@(item.TinhTrang == "Đã hủy")">Đã hủy</option>
+                                    </select>
+                                </td>
+                                <td><span class="status success">@item.PhuongThucThanhToan</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" @onclick="@(() => NavigationManager.NavigateTo($"/ChiTietDonHang/{item.MaDonDH}"))">Chi tiết</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" style="text-align: center;">Không có dữ liệu đơn hàng.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e1e8ed; display: flex; justify-content: space-between; align-items: center;">
+            <p style="color: #95a5a6;">Hiển thị @(((CurrentPage - 1) * PageSize) + 1)-@Math.Min(CurrentPage * PageSize, TotalItems) trong tổng số @TotalItems.ToString("N0") đơn hàng</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" @onclick="@(() => ChangePage(CurrentPage - 1))" disabled="@(CurrentPage <= 1)">← Trước</button>
+                
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    var pageNumber = i;
+                    if (i == 1 || i == TotalPages || (i >= CurrentPage - 2 && i <= CurrentPage + 2))
+                    {
+                        <button class="btn @(CurrentPage == pageNumber ? "btn-primary" : "btn-secondary")" @onclick="@(() => ChangePage(pageNumber))">@pageNumber</button>
+                    }
+                    else if (i == CurrentPage - 3 || i == CurrentPage + 3)
+                    {
+                        <button class="btn btn-secondary" disabled>...</button>
+                    }
+                }
+
+                <button class="btn btn-secondary" @onclick="@(() => ChangePage(CurrentPage + 1))" disabled="@(CurrentPage >= TotalPages)">Sau →</button>
+            </div>
+        </div>
+    </div>
+</div>

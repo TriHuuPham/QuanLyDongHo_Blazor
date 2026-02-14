@@ -1,6 +1,8 @@
 ﻿using DongHoBlazorApp.BL.Reposities.BaoCao;
 using DongHoBlazorApp.BL.Reposities.BinhLuan;
+using DongHoBlazorApp.BL.Reposities.ChiTietDonDH;
 using DongHoBlazorApp.BL.Reposities.ChiTietPhieuNhap;
+using DongHoBlazorApp.BL.Reposities.DonDHang;
 using DongHoBlazorApp.BL.Reposities.DongHo;
 using DongHoBlazorApp.BL.Reposities.KhachHang;
 using DongHoBlazorApp.BL.Reposities.LoaiThanhVien;
@@ -10,7 +12,9 @@ using DongHoBlazorApp.BL.Reposities.PhieuNhap;
 using DongHoBlazorApp.BL.Reposities.ThuongHieu;
 using DongHoBlazorApp.BL.Services.BaoCao;
 using DongHoBlazorApp.BL.Services.BinhLuan;
+using DongHoBlazorApp.BL.Services.ChiTietDonDH;
 using DongHoBlazorApp.BL.Services.ChiTietPhieuNhap;
+using DongHoBlazorApp.BL.Services.DonDHang;
 using DongHoBlazorApp.BL.Services.DongHo;
 using DongHoBlazorApp.BL.Services.KhachHang;
 using DongHoBlazorApp.BL.Services.LoaiThanhVien;
@@ -57,6 +61,10 @@ builder.Services.AddScoped<IKhachHangService, KhachHangService>();
 builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
 builder.Services.AddScoped<IBaoCaoService, BaoCaoService>();
 builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
+builder.Services.AddScoped<IDonDatHangService, DonDatHangService>();
+builder.Services.AddScoped<IDonDatHangRepository, DonDatHangRepository>();
+builder.Services.AddScoped<IChiTietDonDHService, ChiTietDonDHService>();
+builder.Services.AddScoped<IChiTietDonDHRepository, ChiTietDonDHRepository>();
 // --------------- Kết thúc phần đăng ký dịch vụ ở đây ----------------
 
 

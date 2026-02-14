@@ -5,6 +5,7 @@ namespace DongHoBlazorApp.BL.Reposities.DongHo
     public interface IDongHoRepository
     {
         Task<List<DongHoModel>> GetDongHos();
+        Task<List<DongHoModel>> SearchDongHos(string searchTerm);
         Task<DongHoModel> GetDongHoById(int maDH);
         Task<DongHoModel> CreateDongHo(DongHoModel dongHoModel);
         Task DeleteDongHo(DongHoModel dongHoModel);

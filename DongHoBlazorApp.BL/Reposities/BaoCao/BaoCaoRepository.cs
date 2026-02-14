@@ -33,8 +33,14 @@ namespace DongHoBlazorApp.BL.Reposities.BaoCao
                     break;
             }
 
-            // 1. Revenue By Month (Hardcoded simple grouping for demonstration if date range is wide, or just recent months)
-            // For now, let's get the last 6 months
+            // 0. Overview Metrics
+            report.TotalProducts = await dbContext.DongHos.CountAsync();
+            report.TotalOrders = await dbContext.DonDatHangs.CountAsync();
+            report.TotalCustomers = await dbContext.KhachHangs.CountAsync();
+            report.TotalRevenue = await dbContext.ChiTietDonDHs
+                .SumAsync(d => (decimal?)(d.DonGia * d.SoLuong)) ?? 0m;
+
+            // 1. Revenue By Month
             for (int i = 5; i >= 0; i--)
             {
                 var targetMonth = DateTime.Now.AddMonths(-i);
@@ -49,7 +55,7 @@ namespace DongHoBlazorApp.BL.Reposities.BaoCao
                 {
                     Month = monthLabel,
                     Revenue = revenue,
-                    Profit = revenue * 0.3m // Dummy profit calculation
+                    Profit = revenue * 0.3m
                 });
             }
 
@@ -67,12 +73,12 @@ namespace DongHoBlazorApp.BL.Reposities.BaoCao
                 .Take(5)
                 .ToListAsync();
 
-            int totalSales = salesByBrand.Sum(x => x.SalesCount);
-            if (totalSales > 0)
+            int totalSalesCount = salesByBrand.Sum(x => x.SalesCount);
+            if (totalSalesCount > 0)
             {
                 foreach (var item in salesByBrand)
                 {
-                    item.Percentage = Math.Round((double)item.SalesCount / totalSales * 100, 1);
+                    item.Percentage = Math.Round((double)item.SalesCount / totalSalesCount * 100, 1);
                 }
             }
             report.SalesByBrand = salesByBrand;
@@ -86,7 +92,7 @@ namespace DongHoBlazorApp.BL.Reposities.BaoCao
                     CustomerId = g.Key.MaKH,
                     CustomerName = g.Key.TenKH,
                     OrderCount = g.Count(),
-                    TotalSpent = 0 // Will calculate below
+                    TotalSpent = 0 
                 })
                 .OrderByDescending(x => x.OrderCount)
                 .Take(4)
@@ -100,11 +106,59 @@ namespace DongHoBlazorApp.BL.Reposities.BaoCao
                     .SumAsync() ?? 0m;
             }
 
-            // 4. Performance Metrics (Simulated/Calculated)
+            // 4. Top Selling Products
+            var topIds = await dbContext.ChiTietDonDHs
+                .GroupBy(d => d.MaDongHo)
+                .Select(g => new { MaDH = g.Key, Count = g.Sum(x => x.SoLuong) })
+                .OrderByDescending(x => x.Count)
+                .Take(4)
+                .ToListAsync();
+            
+            report.TopSellingProducts = new List<TopProductDto>();
+            foreach(var tid in topIds)
+            {
+                var h = await dbContext.DongHos.FirstOrDefaultAsync(dh => dh.MaDongHo == tid.MaDH);
+                report.TopSellingProducts.Add(new TopProductDto {
+                    ProductId = tid.MaDH,
+                    ProductName = h?.TenDongHo ?? "Unknown",
+                    SalesCount = tid.Count,
+                    Price = h?.GiaBan ?? 0m
+                });
+            }
+
+            // 5. Recent Orders
+            report.RecentOrders = await dbContext.DonDatHangs
+                .OrderByDescending(o => o.NgayDat)
+                .Take(5)
+                .Join(dbContext.KhachHangs, o => o.MaKH, k => k.MaKH, (o, k) => new { o, k })
+                .Select(combined => new RecentOrderDto
+                {
+                    OrderId = combined.o.MaDonDH,
+                    CustomerName = combined.k.TenKH,
+                    OrderDate = combined.o.NgayDat,
+                    Status = combined.o.TinhTrang,
+                    TotalAmount = 0 
+                })
+                .ToListAsync();
+
+            foreach (var order in report.RecentOrders)
+            {
+                order.TotalAmount = await dbContext.ChiTietDonDHs
+                    .Where(d => d.MaDonDH == order.OrderId)
+                    .SumAsync(d => (decimal?)(d.DonGia * d.SoLuong)) ?? 0m;
+                
+                var firstProduct = await dbContext.ChiTietDonDHs
+                    .Where(d => d.MaDonDH == order.OrderId)
+                    .Join(dbContext.DongHos, d => d.MaDongHo, h => h.MaDongHo, (d, h) => h.TenDongHo)
+                    .FirstOrDefaultAsync();
+                order.ProductName = firstProduct ?? "N/A";
+            }
+
+            // 6. Performance Metrics
             report.PerformanceMetrics = new PerformanceMetricsDto
             {
                 ConversionRate = 3.2,
-                AverageOrderValue = await dbContext.ChiTietDonDHs.AverageAsync(d => (decimal?)(d.DonGia * d.SoLuong)) ?? 0m,
+                AverageOrderValue = (await dbContext.ChiTietDonDHs.AnyAsync()) ? await dbContext.ChiTietDonDHs.AverageAsync(d => (decimal?)(d.DonGia * d.SoLuong)) ?? 0m : 0m,
                 CompletionRate = 90.8,
                 AverageProcessingTime = 2.4
             };

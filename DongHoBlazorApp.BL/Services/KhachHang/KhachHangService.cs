@@ -7,14 +7,12 @@ namespace DongHoBlazorApp.BL.Services.KhachHang
     {
         public Task<List<KhachHangModel>> GetKhachHangs()
         {
-            try
-            {
-                return khachHangRepository.GetKhachHangs();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return khachHangRepository.GetKhachHangs();
+        }
+
+        public Task<List<KhachHangModel>> SearchKhachHangs(string searchTerm)
+        {
+            return khachHangRepository.SearchKhachHangs(searchTerm);
         }
 
         public Task<KhachHangModel> GetKhachHangById(int maKH)

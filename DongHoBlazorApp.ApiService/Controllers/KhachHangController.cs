@@ -24,6 +24,20 @@ namespace DongHoBlazorApp.ApiService.Controllers
             }
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<BaseReponseModel>> SearchKhachHangs([FromQuery] string searchTerm)
+        {
+            try
+            {
+                var khachHangs = await khachHangService.SearchKhachHangs(searchTerm);
+                return Ok(new BaseReponseModel { Success = true, Data = khachHangs, ErrorMessage = "" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new BaseReponseModel { Success = false, Data = new object(), ErrorMessage = ex.Message });
+            }
+        }
+
         [HttpGet("khachHangId")]
         public async Task<ActionResult<BaseReponseModel>> GetKhachHangById([FromQuery] int khachHangId)
         {

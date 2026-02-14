@@ -22,6 +22,20 @@ namespace DongHoBlazorApp.ApiService.Controllers
             }
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult> SearchDongHos([FromQuery] string searchTerm)
+        {
+            try
+            {
+                var dongHos = await dongHoService.SearchDongHos(searchTerm);
+                return Ok(new { Success = true, Data = dongHos, ErrorMessage = "" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { Success = false, Data = new object(), ErrorMessage = ex.Message });
+            }
+        }
+
         [HttpGet("dongHoId")]
         public async Task<ActionResult> GetDongHoById([FromQuery] int dongHoId)
         {
